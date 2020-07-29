@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from habilidades import Habilidades
+from habilidades import Ability, AbilityById, lista_habilidades
 import json
 
 
@@ -32,6 +32,11 @@ class Desenvolvedor(Resource):
 
     def put(self, id):
         dados = json.loads(request.data)
+
+        for h in dados['habilidades']:
+            if not h.lower() in lista_habilidades:
+                return {'status':'erro', 'mensagem':'Algumas das habilidades informadas não estão cadastradas!'}
+
         desenvolvedores[id] = dados
 
         return desenvolvedores[id]
@@ -50,8 +55,12 @@ class list_developers(Resource):
         posicao = len(desenvolvedores)
         dados['id'] = posicao
 
-        desenvolvedores.append(dados)
+        for h in dados['habilidades']:
+            if not h.lower() in lista_habilidades:
+                return {'status':'erro', 'mensagem':'Algumas das habilidades informadas não estão cadastradas!'}
 
+
+        desenvolvedores.append(dados)
 
         return desenvolvedores[posicao]
 
@@ -61,7 +70,8 @@ class list_developers(Resource):
 
 api.add_resource(Desenvolvedor, '/dev/<int:id>/')
 api.add_resource(list_developers, '/dev/')
-api.add_resource(Habilidades, '/habilidades/')
+api.add_resource(Ability, '/habilidades/')
+api.add_resource(AbilityById, '/habilidade/<int:id>/')
 
 
 if __name__ == '__main__':
